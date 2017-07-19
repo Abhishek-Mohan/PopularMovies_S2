@@ -69,7 +69,7 @@ public final class NetworkUtils {
         }
         else if (neededQuery.equals("top"))
         {
-            String urlWithString = TOP_RATED.concat("59dfa2d6fd373bda96b580ece2a59bb6");
+            String urlWithString = TOP_RATED.concat(context.getString(R.string.themoviedb_api_key));
             Uri builtUri = Uri.parse(urlWithString).buildUpon()
                     .build();
 
@@ -173,7 +173,7 @@ public final class NetworkUtils {
         }
         else
         {
-            String urlWithString = TOP_RATED.concat("59dfa2d6fd373bda96b580ece2a59bb6");
+            String urlWithString = TOP_RATED.concat(context.getString(R.string.themoviedb_api_key));
             Uri builtUri = Uri.parse(urlWithString).buildUpon()
                     .build();
 
