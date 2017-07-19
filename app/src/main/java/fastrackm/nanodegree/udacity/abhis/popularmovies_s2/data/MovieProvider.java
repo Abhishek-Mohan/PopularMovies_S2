@@ -20,6 +20,8 @@ public class MovieProvider extends ContentProvider
 {
     public static final int CODE_MOVIE = 100;
 
+    public static final int CODE_MOVIE_ID = 101;
+
     private static final UriMatcher mUriMatcher = buildUriMatcher();
     private MovieDbHelper mOpenHelper;
 
@@ -30,7 +32,7 @@ public class MovieProvider extends ContentProvider
 
         matcher.addURI(authority, MovieContract.PATH_MOVIE, CODE_MOVIE);
 
-        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/#", CODE_MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/#", CODE_MOVIE_ID);
 
         return matcher;
     }
@@ -63,6 +65,29 @@ public class MovieProvider extends ContentProvider
                 break;
 
             }
+
+            case CODE_MOVIE_ID:
+            {
+                // using selection and selectionARgs
+                // URI: content://<authority>/tasks/#
+                String id = uri.getPathSegments().get(1);
+
+                // Selection is the movie_id column = ?, and the selection args = the row db id from the URI
+                String mSelection = "movie_id=?";
+                String [] mSelectionArgs = new String[]{id};
+
+                cursor = mOpenHelper.getReadableDatabase().query(
+                        TABLE_NAME,
+                        projection,
+                        mSelection,
+                        mSelectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+
+            }
+
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -123,11 +148,11 @@ public class MovieProvider extends ContentProvider
         // [Hint] Use selections to delete an item by its row ID
         switch (match) {
             // Handle the single item case, recognized by the ID included in the URI path
-            case CODE_MOVIE:
+            case CODE_MOVIE_ID:
                 // Get the task ID from the URI path
                 String id = uri.getPathSegments().get(1);
                 // Use selections/selectionArgs to filter for this ID
-                moviesDeleted = db.delete(TABLE_NAME, "_id=?", new String[]{id});
+                moviesDeleted = db.delete(TABLE_NAME, "movie_id=?", new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

@@ -2,6 +2,8 @@ package fastrackm.nanodegree.udacity.abhis.popularmovies_s2;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,6 +46,13 @@ public class MovieDetailActivity extends AppCompatActivity
     private TextView mAuthors;
     private TextView mContent;
 
+    public static final String[] FAVORITE_MOVIE_PROJECTION = {
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID
+    };
+
+    public static final int INDEX_MOVIE_ID = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +63,7 @@ public class MovieDetailActivity extends AppCompatActivity
         Intent currentMovie = getIntent();
         Movie currentMovieObj = (Movie) currentMovie.getSerializableExtra("movieObject");
 
-        String movieTitle = currentMovieObj.getMtitle();
+        final String movieTitle = currentMovieObj.getMtitle();
         String movieBackDrop = currentMovieObj.getmPoster();
         String moviePlot = currentMovieObj.getmPlot();
         double movieRating = currentMovieObj.getmUserRating();
@@ -81,20 +90,36 @@ public class MovieDetailActivity extends AppCompatActivity
                 getString(R.string.Rating), Double.toString(movieRating)));
         mMoviedate.setText(String.format(getApplicationContext().
                 getString(R.string.Release_Date), movieDate));
+        boolean isClicked = CheckIsDataAlreadyInDBorNot(movieDBID);
+
 
         mFavButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                ContentValues contentValues = new ContentValues();
-
-                contentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movieDBID);
-                Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
-
-                if (uri != null)
+                if (CheckIsDataAlreadyInDBorNot(movieDBID))
                 {
-                    Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "does it get here");
+                    String stringId = movieDBID;
+                    Uri uri = MovieContract.MovieEntry.CONTENT_URI;
+                    uri = uri.buildUpon().appendPath(stringId).build();
+                    getContentResolver().delete(uri, null, null);
+
+                }
+                else
+                {
+                    ContentValues contentValues = new ContentValues();
+
+                    contentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE, movieTitle);
+                    contentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movieDBID);
+                    Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
+
+                    if (uri != null)
+                    {
+                        Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+                    }
+
                 }
 
             }
@@ -125,6 +150,8 @@ public class MovieDetailActivity extends AppCompatActivity
         });
 
 
+
+
        /* if (movieReviews.get(0) != null)
         {
             Reviews mReview = movieReviews.get(0);
@@ -133,6 +160,21 @@ public class MovieDetailActivity extends AppCompatActivity
         }*/
         new FetchMovieTask().execute(currentMovieObj.getmDBID());
 
+    }
+
+    public boolean CheckIsDataAlreadyInDBorNot(String id) {
+
+           Cursor mCursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
+                    null,
+                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                    new String[]{id},
+                    null);
+        if(mCursor.getCount() <= 0){
+            mCursor.close();
+            return false;
+        }
+        mCursor.close();
+        return true;
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Reviews>>
@@ -161,6 +203,12 @@ public class MovieDetailActivity extends AppCompatActivity
                 e.printStackTrace();
                 return null;
             }
+
+          /*  Cursor mCursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
+                    null,
+                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?",
+                    new String[]{id},
+                    null);*/
 
         }
 

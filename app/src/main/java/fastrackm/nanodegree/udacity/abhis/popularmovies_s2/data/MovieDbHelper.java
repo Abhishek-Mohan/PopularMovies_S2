@@ -14,7 +14,7 @@ public class MovieDbHelper extends SQLiteOpenHelper
 {
     public static final String DATABASE_NAME = "movie.db";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public MovieDbHelper(Context context)
     {
@@ -27,6 +27,7 @@ public class MovieDbHelper extends SQLiteOpenHelper
         // Create tasks table (careful to follow SQL formatting rules)
         final String CREATE_TABLE = "CREATE TABLE "  + MovieContract.MovieEntry.TABLE_NAME + " (" +
                 MovieContract.MovieEntry._ID                + " INTEGER PRIMARY KEY, " +
+                MovieContract.MovieEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL);";
 
         db.execSQL(CREATE_TABLE);
