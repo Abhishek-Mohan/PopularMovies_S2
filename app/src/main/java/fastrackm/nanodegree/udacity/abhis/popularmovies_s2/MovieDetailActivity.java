@@ -75,22 +75,19 @@ public class MovieDetailActivity extends AppCompatActivity
         getSupportActionBar().setTitle(movieTitle);
 
         mMovieBackDrop = (ImageView) findViewById(R.id.main_backdrop);
-        mMoviePlot = (TextView) findViewById(R.id.plot_summary);
+        Picasso.with(this).load(movieBackDrop).fit().into(mMovieBackDrop);
+/*        mMoviePlot = (TextView) findViewById(R.id.plot_summary);
         mMovieRating = (TextView) findViewById(R.id.user_rating);
         mMoviedate = (TextView) findViewById(R.id.release_date);
         mFavButton = (Button) findViewById(R.id.favorite_button);
         mTrailers = (ImageView) findViewById(R.id.movieTrailer1);
         mAuthors = (TextView) findViewById(R.id.movieReviewAuthor1);
-        mContent = (TextView) findViewById(R.id.movieReviewReview);
+        mContent = (TextView) findViewById(R.id.movieReviewReview); */
 
-        Picasso.with(this).load(movieBackDrop).fit().into(mMovieBackDrop);
-        mMoviePlot.setText(String.format(getApplicationContext().
-                getString(R.string.Plot_Synopsis), moviePlot));
-        mMovieRating.setText(String.format(getApplicationContext().
-                getString(R.string.Rating), Double.toString(movieRating)));
-        mMoviedate.setText(String.format(getApplicationContext().
-                getString(R.string.Release_Date), movieDate));
-        boolean isClicked = CheckIsDataAlreadyInDBorNot(movieDBID);
+        //mMoviePlot.setText(String.format(getApplicationContext().getString(R.string.Plot_Synopsis), moviePlot));
+       // mMovieRating.setText(String.format(getApplicationContext().getString(R.string.Rating), Double.toString(movieRating)));
+      //  mMoviedate.setText(String.format(getApplicationContext().getString(R.string.Release_Date), movieDate));
+      /*  boolean isClicked = CheckIsDataAlreadyInDBorNot(movieDBID);
 
 
         mFavButton.setOnClickListener(new View.OnClickListener()
@@ -152,13 +149,8 @@ public class MovieDetailActivity extends AppCompatActivity
 
 
 
-       /* if (movieReviews.get(0) != null)
-        {
-            Reviews mReview = movieReviews.get(0);
-            mAuthors.setText(mReview.getmAuthor());
-            mContent.setText(mReview.getmContent());
-        }*/
-        new FetchMovieTask().execute(currentMovieObj.getmDBID());
+
+        new FetchMovieTask().execute(currentMovieObj.getmDBID());*/
 
     }
 
