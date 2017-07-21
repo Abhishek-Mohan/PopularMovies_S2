@@ -144,6 +144,7 @@ public final class themoviedbJsonUtils
         ArrayList<String> movieTrailers = new ArrayList<>();
 
         final String KEY = "key";
+        final String TYPE = "type";
         final String SUCCESS_STATUS = "false";
 
         final String MOVIE_LIST = "results";
@@ -160,20 +161,20 @@ public final class themoviedbJsonUtils
 
 
         JSONArray movieArray = movieJson.getJSONArray(MOVIE_LIST);
-        Log.d(TAG, String.valueOf(movieArray));
-
-        //parsedMovieData = new Movie[movieArray.length()];
 
         for (int i = 0; i <movieArray.length(); i++)
         {
             String key;
 
 
+
             JSONObject currentMovie = movieArray.getJSONObject(i);
 
-            key = currentMovie.getString(KEY);
-
-            movieTrailers.add(key);
+            if (currentMovie.get(TYPE).equals("Trailer"))
+            {
+                key = currentMovie.getString(KEY);
+                movieTrailers.add(key);
+            }
 
         }
 

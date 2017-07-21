@@ -2,6 +2,7 @@ package fastrackm.nanodegree.udacity.abhis.popularmovies_s2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,21 +18,19 @@ import java.util.ArrayList;
 
 import fastrackm.nanodegree.udacity.abhis.popularmovies_s2.models.Movie;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * Created by abhis on 6/11/2017.
  */
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder>
+public class MovieDetailTrailerAdapter extends RecyclerView.Adapter<MovieDetailTrailerAdapter.MovieAdapterViewHolder>
 {
-    private ArrayList<Movie> mMovieDataTitles;
+    private ArrayList<String> mMovieTrailers;
 
     /*
      * An on-click handler that we've defined to make it easy for an Activity to interface with
      * our RecyclerView
      */
-    private final MovieAdapterOnClickHandler mClickHandler;
+    private final TrailerAdapterOnClickHandler mClickHandler;
     private Context mContext;
 
 
@@ -39,69 +38,62 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     /**
      * The interface that receives onClick messages.
      */
-    public interface MovieAdapterOnClickHandler
+    public interface TrailerAdapterOnClickHandler
     {
         // Need to pass in information like title (string),
         // image thumbnail (url), plot (string), user rating (string), and release date (string)
         void onClick();
     }
 
-    MovieAdapter(Context context, MovieAdapterOnClickHandler clickHandler)
+    MovieDetailTrailerAdapter(Context context, TrailerAdapterOnClickHandler clickHandler, ArrayList<String> movieTrailers)
     {
-        mContext = context;
+        this.mContext = context;
         this.mClickHandler = clickHandler;
+        this.mMovieTrailers = movieTrailers;
     }
 
     public MovieAdapterViewHolder onCreateViewHolder(ViewGroup parent, int i)
     {
-        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_grid, parent, false);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.trailers_grid, parent, false);
         return new MovieAdapterViewHolder(layoutView);
     }
 
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder movieAdapterViewHolder, int i)
     {
-        // Need to set the image here from an array of images.
-        // Here is probably where i need to start appending the images url
-        // to make sure they work with picasso.
-        Movie currentMovie = mMovieDataTitles.get(i);
-        movieAdapterViewHolder.mMovieTitle.setText(currentMovie.getMtitle());
-        //Log.d(TAG, currentMovie.getmPoster());
-        Picasso.with(mContext).load(currentMovie.getmPoster()).fit().into(movieAdapterViewHolder.mMoviePoster);
+        //Picasso.with(mContext).load(R.drawable.ic_ondemand_video_black_36px).into(movieAdapterViewHolder.mPlayTrailer);
     }
 
-    public ArrayList<Movie> getMovieList()
+    public ArrayList<String> getMovieList()
     {
-        return mMovieDataTitles;
+        return mMovieTrailers;
     }
 
     @Override
     public int getItemCount()
     {
-        if (mMovieDataTitles == null)
+        if (mMovieTrailers == null)
         {
             return 0;
         }
-        return mMovieDataTitles.size();
+        return mMovieTrailers.size();
     }
 
-    void setMovieData(ArrayList<Movie> movieData)
+    void setMovieData(ArrayList<String> movieTrailers)
     {
-        mMovieDataTitles = movieData;
+        mMovieTrailers = movieTrailers;
         notifyDataSetChanged();
     }
 
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener
     {
-        ImageView mMoviePoster;
-        TextView mMovieTitle;
+        ImageView mPlayTrailer;
 
         MovieAdapterViewHolder(View itemView)
         {
             super(itemView);
-            mMoviePoster = (ImageView) itemView.findViewById(R.id.moviePoster);
-            mMovieTitle = (TextView) itemView.findViewById(R.id.country_name);
+             mPlayTrailer = (ImageView) itemView.findViewById(R.id.playTrailer);
             itemView.setOnClickListener(this);
         }
 
@@ -109,12 +101,19 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         public void onClick(View view)
         {
             int adapterPosition = getAdapterPosition();
-            Movie currentMovie = mMovieDataTitles.get(adapterPosition);
-            Toast.makeText(mContext, "Going to Movie Detail", Toast.LENGTH_SHORT).show();
+            String currentTrailer = mMovieTrailers.get(adapterPosition);
             mClickHandler.onClick();
-            Intent sendToMovieActivity = new Intent(mContext, MovieDetailActivity.class);
-            sendToMovieActivity.putExtra("movieObject", currentMovie);
-            mContext.startActivity(sendToMovieActivity);
+
+            String video_path = "http://www.youtube.com/watch?v=";
+            String appendedVideoPath = video_path.concat(currentTrailer);
+            Uri uri = Uri.parse(appendedVideoPath);
+
+            // With this line the Youtube application, if installed, will launch immediately.
+            // Without it you will be prompted with a list of the application to choose.
+            uri = Uri.parse("vnd.youtube:"  + uri.getQueryParameter("v"));
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            mContext.startActivity(intent);
         }
     }
 

@@ -38,7 +38,7 @@ import fastrackm.nanodegree.udacity.abhis.popularmovies_s2.utilities.themoviedbJ
  * Created by abhis on 6/13/2017.
  */
 
-public class MovieDetailActivity extends AppCompatActivity
+public class MovieDetailActivity extends AppCompatActivity implements MovieDetailTrailerAdapter.TrailerAdapterOnClickHandler
 {
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
 
@@ -47,7 +47,7 @@ public class MovieDetailActivity extends AppCompatActivity
     private GridLayoutManager mTrailerLayoutManager;
     private LinearLayoutManager mReviewLayoutManager;
     private MovieDetailReviewAdapter mReviewAdapter;
-    //private MovieDetailTrailerAdapter mTrailerAdapter;
+    private MovieDetailTrailerAdapter mTrailerAdapter;
     private Context mContext;
 
     private ImageView mMovieBackDrop;
@@ -72,6 +72,7 @@ public class MovieDetailActivity extends AppCompatActivity
         setContentView(R.layout.activity_movie_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
+        mContext = getApplicationContext();
 
         Intent currentMovie = getIntent();
         Movie currentMovieObj = currentMovie.getParcelableExtra("movieObject");
@@ -83,7 +84,7 @@ public class MovieDetailActivity extends AppCompatActivity
         double movieRating = currentMovieObj.getmUserRating();
         String movieDate = currentMovieObj.getmReleaseDate();
         final String movieDBID = currentMovieObj.getmDBID();
-        final ArrayList<String> movieTrailers = currentMovieObj.getmMovieTrailers();
+        ArrayList<String> movieTrailers = currentMovieObj.getmMovieTrailers();
         //ArrayList<Reviews> movieReviews = currentMovieObj.getmReviews();
 
         getSupportActionBar().setTitle(movieTitle);
@@ -104,20 +105,19 @@ public class MovieDetailActivity extends AppCompatActivity
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailerRecycler);
 
         mReviewLayoutManager = new LinearLayoutManager(this);
-        //mTrailerLayoutManager = new GridLayoutManager(this, 2);
+        mTrailerLayoutManager = new GridLayoutManager(this, 2);
 
         mReviewRecyclerView.setLayoutManager(mReviewLayoutManager);
-        //mTrailerRecyclerView.setLayoutManager(mTrailerLayoutManager);
+        mTrailerRecyclerView.setLayoutManager(mTrailerLayoutManager);
 
         mReviewAdapter = new MovieDetailReviewAdapter(mContext);
-        //mTrailerAdapter = new MovieDetailTrailerAdapter(mContext, this);
+        mTrailerAdapter = new MovieDetailTrailerAdapter(mContext, this, movieTrailers);
 
         mReviewRecyclerView.setAdapter(mReviewAdapter);
-        //mTrailerRecyclerView.setAdapter(mTrailerAdapter);
+        mTrailerRecyclerView.setAdapter(mTrailerAdapter);
 
         mReviewRecyclerView.setHasFixedSize(true);
-        //mTrailerRecyclerView.setHasFixedSize(true);
-
+        mTrailerRecyclerView.setHasFixedSize(true);
 
         mFavButton.setOnClickListener(new View.OnClickListener()
         {
@@ -198,6 +198,11 @@ public class MovieDetailActivity extends AppCompatActivity
         }
         mCursor.close();
         return true;
+    }
+
+    @Override
+    public void onClick() {
+
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<Reviews>>
