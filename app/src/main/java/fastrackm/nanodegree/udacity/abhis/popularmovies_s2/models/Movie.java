@@ -1,5 +1,8 @@
 package fastrackm.nanodegree.udacity.abhis.popularmovies_s2.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +10,7 @@ import java.util.List;
 /**
  * Created by abhis on 6/13/2017.
  */
-
-public class Movie implements Serializable
-{
+public class Movie implements Parcelable {
     private String mDBID;
     private String mtitle;
     private String mPoster;
@@ -123,4 +124,67 @@ public class Movie implements Serializable
     public void setmReleaseDate(String mReleaseDate) {
         this.mReleaseDate = mReleaseDate;
     }
+
+    protected Movie(Parcel in) {
+        mDBID = in.readString();
+        mtitle = in.readString();
+        mPoster = in.readString();
+        mBackDrop = in.readString();
+        mPlot = in.readString();
+        mUserRating = in.readDouble();
+        mReleaseDate = in.readString();
+        if (in.readByte() == 0x01) {
+            mMovieTrailers = new ArrayList<String>();
+            in.readList(mMovieTrailers, String.class.getClassLoader());
+        } else {
+            mMovieTrailers = null;
+        }
+        if (in.readByte() == 0x01) {
+            mReviews = new ArrayList<Reviews>();
+            in.readList(mReviews, Reviews.class.getClassLoader());
+        } else {
+            mReviews = null;
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mDBID);
+        dest.writeString(mtitle);
+        dest.writeString(mPoster);
+        dest.writeString(mBackDrop);
+        dest.writeString(mPlot);
+        dest.writeDouble(mUserRating);
+        dest.writeString(mReleaseDate);
+        if (mMovieTrailers == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(mMovieTrailers);
+        }
+        if (mReviews == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(mReviews);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 }

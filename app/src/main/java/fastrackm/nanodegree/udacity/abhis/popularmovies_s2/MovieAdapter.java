@@ -68,8 +68,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         movieAdapterViewHolder.mMovieTitle.setText(currentMovie.getMtitle());
         Log.d(TAG, currentMovie.getmPoster());
         Picasso.with(mContext).load(currentMovie.getmPoster()).into(movieAdapterViewHolder.mMoviePoster);
+    }
 
-
+    public ArrayList<Movie> getMovieList()
+    {
+        return mMovieDataTitles;
     }
 
     @Override

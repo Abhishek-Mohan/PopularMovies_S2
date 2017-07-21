@@ -50,19 +50,18 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public static final int INDEX_MOVIE_ID = 0;
 
     private static final int ID_MOVIE_LOADER = 44;
-    private static final int ID_MOVIE_LOADEROG = 45;
-
-    //private static final String LIST_STATE_KEY = "statekey";
 
     private static final String MOVIE_QUERY = "query";
 
     Cursor mCursor;
 
-    //Parcelable mListState;
+    public final static String LIST_STATE_KEY = "recycler_list_state";
+    public final static String LIST_VALUE_KEY = "recycler_list_values";
 
-    private static final String KEY_RECYCLER_STATE = "recycler_state";
-    private static Bundle mBundleRecyclerViewState;
+    public final static String CURRENT_QUERY = "movie_query";
 
+    Parcelable listState;
+    ArrayList<Movie> movieList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,67 +82,84 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setHasFixedSize(true);
 
-        loadMovieData(defaultList);
-    }
+       if (savedInstanceState != null)
+        {
+            String currentQuery = savedInstanceState.getString(CURRENT_QUERY);
+            Log.d(TAG, currentQuery);
 
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
+            if (currentQuery.equals("favorite"))
+            {
+                defaultList = currentQuery;
+                loadFavMovieData();
+            }
+            else
+            {
+                defaultList = currentQuery;
+                loadMovieData(currentQuery);
+            }
+        }
+        else
+       {
 
-        // save RecyclerView state
-        mBundleRecyclerViewState = new Bundle();
-        Parcelable listState = mRecyclerView.getLayoutManager().onSaveInstanceState();
-        mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, listState);
-    }
+           loadMovieData(defaultList);
+       }
+       }
 
-   /* protected void onSaveInstanceState(Bundle state)
+
+    protected void onSaveInstanceState(Bundle state)
     {
         super.onSaveInstanceState(state);
-
         // Save list state
-        mListState = mLayoutManager.onSaveInstanceState();
-        state.putParcelable(LIST_STATE_KEY, mListState);
+        listState = mLayoutManager.onSaveInstanceState();
+        state.putString(CURRENT_QUERY, defaultList);
+        state.putParcelable(LIST_STATE_KEY, listState);
+        state.putParcelableArrayList(LIST_VALUE_KEY, mAdapter.getMovieList());
     }
 
     protected void onRestoreInstanceState(Bundle state)
     {
         super.onRestoreInstanceState(state);
-
-        // Retrieve list state and list/item positions
-        if (state != null)
+       /* if (state != null)
         {
-            mListState = state.getParcelable(LIST_STATE_KEY);
-        }
-    }*/
+            String currentQuery = state.getString(CURRENT_QUERY);
+            Log.d(TAG, currentQuery);
+
+            if (currentQuery.equals("favorite"))
+            {
+                loadFavMovieData();
+            }
+            else
+            {
+                loadMovieData(currentQuery);
+            }
+
+            *//*Log.d(TAG, "does it reach onRestore");
+            //listState = state.getParcelable(LIST_STATE_KEY);
+            movieList = state.getParcelableArrayList(LIST_VALUE_KEY);
+            mAdapter.setMovieData(movieList);
+            mAdapter.notifyDataSetChanged();*//*
+        }*/
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-       /* if (mListState != null)
-        {
-            Log.d(TAG, "does it run this?");
-            mLayoutManager.onRestoreInstanceState(mListState);
-        }*/
-
-       if (mBundleRecyclerViewState != null)
-       {
-           Parcelable listState = mBundleRecyclerViewState.getParcelable(KEY_RECYCLER_STATE);
-           mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
-       }
 
         if (mCursor != null)
         {
             mCursor.close();
         }
+
+        if (listState != null)
+        {
+            mLayoutManager.onRestoreInstanceState(listState);
+            mAdapter.setMovieData(movieList);
+        }
     }
 
     private void loadMovieData(String typeOfMovies)
     {
-        Bundle movieQuery = new Bundle();
-        movieQuery.putString(MOVIE_QUERY, typeOfMovies);
-        //getSupportLoaderManager().initLoader(ID_MOVIE_LOADEROG, movieQuery, MovieCallback);
         new FetchMovieTask().execute(typeOfMovies);
     }
 
@@ -188,6 +204,7 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args)
     {
+
         switch (id) {
 
             case ID_MOVIE_LOADER:
@@ -216,7 +233,7 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
     @Override
     public void onLoaderReset(Loader<Cursor> loader)
     {
-        mAdapter.setMovieData(null);
+
     }
 
     public class FetchFavTask extends AsyncTask< ArrayList<Integer>, Void, ArrayList<Movie>>
@@ -415,16 +432,19 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
         }
         if (id == R.id.popular_movies)
         {
+            defaultList = "popular";
             loadMovieData("popular");
             return true;
         }
         if (id == R.id.top_rated)
         {
+            defaultList = "top";
             loadMovieData("top");
             return true;
         }
         if (id == R.id.favorite_movies)
         {
+            defaultList = "favorite";
             Log.d(TAG, "it clicked here");
             loadFavMovieData();
             return true;
