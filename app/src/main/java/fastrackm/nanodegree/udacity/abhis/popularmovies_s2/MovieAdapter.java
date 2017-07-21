@@ -66,7 +66,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         // to make sure they work with picasso.
         Movie currentMovie = mMovieDataTitles.get(i);
         movieAdapterViewHolder.mMovieTitle.setText(currentMovie.getMtitle());
-        Log.d(TAG, currentMovie.getmPoster());
+        //Log.d(TAG, currentMovie.getmPoster());
         Picasso.with(mContext).load(currentMovie.getmPoster()).into(movieAdapterViewHolder.mMoviePoster);
     }
 

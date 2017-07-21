@@ -1,6 +1,7 @@
 package fastrackm.nanodegree.udacity.abhis.popularmovies_s2;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,6 +9,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +41,15 @@ import fastrackm.nanodegree.udacity.abhis.popularmovies_s2.utilities.themoviedbJ
 public class MovieDetailActivity extends AppCompatActivity
 {
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
+
+    private RecyclerView mReviewRecyclerView;
+    private RecyclerView mTrailerRecyclerView;
+    private GridLayoutManager mTrailerLayoutManager;
+    private LinearLayoutManager mReviewLayoutManager;
+    private MovieDetailReviewAdapter mReviewAdapter;
+    //private MovieDetailTrailerAdapter mTrailerAdapter;
+    private Context mContext;
+
     private ImageView mMovieBackDrop;
     private TextView mMoviePlot;
     private TextView mMovieRating;
@@ -77,18 +90,33 @@ public class MovieDetailActivity extends AppCompatActivity
 
         mMovieBackDrop = (ImageView) findViewById(R.id.main_backdrop);
         Picasso.with(this).load(movieBackDrop).fit().into(mMovieBackDrop);
-/*        mMoviePlot = (TextView) findViewById(R.id.plot_summary);
+        mMoviePlot = (TextView) findViewById(R.id.plot_summary);
         mMovieRating = (TextView) findViewById(R.id.user_rating);
         mMoviedate = (TextView) findViewById(R.id.release_date);
         mFavButton = (Button) findViewById(R.id.favorite_button);
-        mTrailers = (ImageView) findViewById(R.id.movieTrailer1);
-        mAuthors = (TextView) findViewById(R.id.movieReviewAuthor1);
-        mContent = (TextView) findViewById(R.id.movieReviewReview); */
 
-        //mMoviePlot.setText(String.format(getApplicationContext().getString(R.string.Plot_Synopsis), moviePlot));
-       // mMovieRating.setText(String.format(getApplicationContext().getString(R.string.Rating), Double.toString(movieRating)));
-      //  mMoviedate.setText(String.format(getApplicationContext().getString(R.string.Release_Date), movieDate));
-      /*  boolean isClicked = CheckIsDataAlreadyInDBorNot(movieDBID);
+        mMoviePlot.setText(String.format(getApplicationContext().getString(R.string.Plot_Synopsis), moviePlot));
+        mMovieRating.setText(String.format(getApplicationContext().getString(R.string.Rating), Double.toString(movieRating)));
+        mMoviedate.setText(String.format(getApplicationContext().getString(R.string.Release_Date), movieDate));
+        boolean isClicked = CheckIsDataAlreadyInDBorNot(movieDBID);
+
+        mReviewRecyclerView = (RecyclerView) findViewById(R.id.reviewRecycler);
+        mTrailerRecyclerView = (RecyclerView) findViewById(R.id.trailerRecycler);
+
+        mReviewLayoutManager = new LinearLayoutManager(this);
+        //mTrailerLayoutManager = new GridLayoutManager(this, 2);
+
+        mReviewRecyclerView.setLayoutManager(mReviewLayoutManager);
+        //mTrailerRecyclerView.setLayoutManager(mTrailerLayoutManager);
+
+        mReviewAdapter = new MovieDetailReviewAdapter(mContext);
+        //mTrailerAdapter = new MovieDetailTrailerAdapter(mContext, this);
+
+        mReviewRecyclerView.setAdapter(mReviewAdapter);
+        //mTrailerRecyclerView.setAdapter(mTrailerAdapter);
+
+        mReviewRecyclerView.setHasFixedSize(true);
+        //mTrailerRecyclerView.setHasFixedSize(true);
 
 
         mFavButton.setOnClickListener(new View.OnClickListener()
@@ -123,6 +151,12 @@ public class MovieDetailActivity extends AppCompatActivity
             }
         });
 
+
+
+        new FetchMovieTask().execute(currentMovieObj.getmDBID());
+
+/*
+
         mTrailers.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -146,12 +180,8 @@ public class MovieDetailActivity extends AppCompatActivity
 
             }
         });
+*/
 
-
-
-
-
-        new FetchMovieTask().execute(currentMovieObj.getmDBID());*/
 
     }
 
@@ -206,21 +236,13 @@ public class MovieDetailActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Reviews> movieData)
+        protected void onPostExecute(ArrayList<Reviews> reviewData)
         {
-            if (movieData != null)
+            if (!reviewData.isEmpty())
             {
-                if (!movieData.isEmpty())
-                {
-                    if (movieData.get(0) != null )
-                    {
-                        Reviews mReview = movieData.get(0);
-                        mAuthors.setText(mReview.getmAuthor());
-                        mContent.setText(mReview.getmContent());
-                    }
-
-                }
+                mReviewAdapter.setMovieReviewData(reviewData);
             }
+
             else
             {
                 Log.d(TAG, "this failed terribly");
