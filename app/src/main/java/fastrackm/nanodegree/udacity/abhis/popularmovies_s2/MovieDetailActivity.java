@@ -61,7 +61,8 @@ public class MovieDetailActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         Intent currentMovie = getIntent();
-        Movie currentMovieObj = (Movie) currentMovie.getSerializableExtra("movieObject");
+        Movie currentMovieObj = currentMovie.getParcelableExtra("movieObject");
+        //Movie currentMovieObj = (Movie) currentMovie.getSerializableExtra("movieObject");
 
         final String movieTitle = currentMovieObj.getMtitle();
         String movieBackDrop = currentMovieObj.getmPoster();

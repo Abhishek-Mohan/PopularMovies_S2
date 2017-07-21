@@ -153,8 +153,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         if (listState != null)
         {
-            mLayoutManager.onRestoreInstanceState(listState);
-            mAdapter.setMovieData(movieList);
+            Log.d(TAG, "listState is not null");
+            if (!defaultList.equals("popular") && !defaultList.equals("top"))
+            {
+                loadFavMovieData();
+            }
+            else
+            {
+                loadMovieData(defaultList);
+            }
         }
     }
 
@@ -177,22 +184,22 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
     {
         mCursor = cursor;
         // Query here from cursor.  Give recyclerview the queried data.
-        Log.d(TAG, "does it come here twice");
+        //Log.d(TAG, "does it come here twice");
         favMovieIDList = new ArrayList<Integer>();
         ArrayList<Movie> favMovieList = new ArrayList<Movie>();
 
         try {
-            Log.d(TAG, "what about here");
+            //Log.d(TAG, "what about here");
 
             while (mCursor.moveToNext())
             {
                 int movieID = mCursor.getInt(INDEX_MOVIE_ID);
-                Log.d(TAG, String.valueOf(movieID));
+                //Log.d(TAG, String.valueOf(movieID));
                 favMovieIDList.add(movieID);
             }
         }
         finally {
-            Log.d(TAG, "here?");
+            //Log.d(TAG, "here?");
             cursor.close();
 
         }
@@ -314,7 +321,7 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
             }
             else
             {
-                Log.d(TAG, "this failed terribly");
+                //Log.d(TAG, "this failed terribly");
             }
         }
 
@@ -404,7 +411,7 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
             }
             else
             {
-                Log.d(TAG, "this failed terribly");
+                //Log.d(TAG, "this failed terribly");
             }
         }
 
@@ -445,7 +452,6 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
         if (id == R.id.favorite_movies)
         {
             defaultList = "favorite";
-            Log.d(TAG, "it clicked here");
             loadFavMovieData();
             return true;
         }
