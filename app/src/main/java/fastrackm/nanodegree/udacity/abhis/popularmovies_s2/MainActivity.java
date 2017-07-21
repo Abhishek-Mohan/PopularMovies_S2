@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.CursorLoader;
@@ -48,8 +50,19 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     public static final int INDEX_MOVIE_ID = 0;
 
     private static final int ID_MOVIE_LOADER = 44;
+    private static final int ID_MOVIE_LOADEROG = 45;
+
+    //private static final String LIST_STATE_KEY = "statekey";
+
+    private static final String MOVIE_QUERY = "query";
 
     Cursor mCursor;
+
+    //Parcelable mListState;
+
+    private static final String KEY_RECYCLER_STATE = "recycler_state";
+    private static Bundle mBundleRecyclerViewState;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +84,54 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mRecyclerView.setHasFixedSize(true);
 
         loadMovieData(defaultList);
-
-
     }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        // save RecyclerView state
+        mBundleRecyclerViewState = new Bundle();
+        Parcelable listState = mRecyclerView.getLayoutManager().onSaveInstanceState();
+        mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, listState);
+    }
+
+   /* protected void onSaveInstanceState(Bundle state)
+    {
+        super.onSaveInstanceState(state);
+
+        // Save list state
+        mListState = mLayoutManager.onSaveInstanceState();
+        state.putParcelable(LIST_STATE_KEY, mListState);
+    }
+
+    protected void onRestoreInstanceState(Bundle state)
+    {
+        super.onRestoreInstanceState(state);
+
+        // Retrieve list state and list/item positions
+        if (state != null)
+        {
+            mListState = state.getParcelable(LIST_STATE_KEY);
+        }
+    }*/
 
     @Override
     protected void onResume() {
         super.onResume();
+
+       /* if (mListState != null)
+        {
+            Log.d(TAG, "does it run this?");
+            mLayoutManager.onRestoreInstanceState(mListState);
+        }*/
+
+       if (mBundleRecyclerViewState != null)
+       {
+           Parcelable listState = mBundleRecyclerViewState.getParcelable(KEY_RECYCLER_STATE);
+           mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
+       }
 
         if (mCursor != null)
         {
@@ -87,6 +141,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     private void loadMovieData(String typeOfMovies)
     {
+        Bundle movieQuery = new Bundle();
+        movieQuery.putString(MOVIE_QUERY, typeOfMovies);
+        //getSupportLoaderManager().initLoader(ID_MOVIE_LOADEROG, movieQuery, MovieCallback);
         new FetchMovieTask().execute(typeOfMovies);
     }
 
@@ -154,82 +211,12 @@ getSupportLoaderManager().restartLoader(ID_MOVIE_LOADER, null, this);
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor)
     {
         nextTask(cursor);
-     /*   // Query here from cursor.  Give recyclerview the queried data.
-        Log.d(TAG, "Gets to onLoadFinished");
-       favMovieIDList = new ArrayList<Integer>();
-        ArrayList<Movie> favMovieList = new ArrayList<Movie>();
-
-        try {
-            while (cursor.moveToNext())
-            {
-                int movieID = cursor.getInt(INDEX_MOVIE_ID);
-                Log.d(TAG, String.valueOf(movieID));
-                favMovieIDList.add(movieID);
-            }
-        }
-        finally {
-            cursor.close();
-
-        }
-*/
-        // Need to first query all details and put that stuff in
-        // Next to to then query all the trailers and do that
-        // Lastly query all the reviews and finish up hopefully
-
-        //Log.d(TAG, "it gets to after parsing cursor data");
-
-
-       /* for (Integer id : favMovieIDList)
-        {
-            // do first query here
-            URL movieRequestURL = NetworkUtils.buildUrl(mContext, "details", id);
-            try
-            {
-
-                Movie currentMovie;
-                String jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(movieRequestURL);
-                currentMovie = themoviedbJsonUtils.getMovieDetail(jsonMovieResponse);
-                favMovieList.add(currentMovie);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-        }*/
-
-        //mAdapter.setMovieData(favMovieList);
-
-
-
-
-       /* for (Integer id : favMovieIDList)
-        {
-            // do second query here
-        }
-
-        for (Integer id : favMovieIDList)
-        {
-            // do third query here
-        }
-*/
-        /*Log.d(TAG, String.valueOf(data));
-        Log.d(TAG, String.valueOf(data.getColumnNames()));
-        Log.d(TAG, String.valueOf(data.getColumnCount()));
-        Log.d(TAG, data.toString());
-        Log.d(TAG, String.valueOf(data.getCount()));*/
-
-
-
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader)
     {
         mAdapter.setMovieData(null);
-
     }
 
     public class FetchFavTask extends AsyncTask< ArrayList<Integer>, Void, ArrayList<Movie>>
